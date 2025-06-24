@@ -149,7 +149,6 @@
   let incrementalIntervalId = null;
   let isPaused = false;
 
-  // Track protected keys and objects to skip corruption
   const protectedKeys = new Set([
     "corruptorGUI",
     "corruptBtn",
