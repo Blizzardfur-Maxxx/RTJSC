@@ -145,10 +145,8 @@
   const corruptModeSelect = document.getElementById("corruptModeSelect");
   const pauseBtn = document.getElementById("pauseBtn");
   const resumeBtn = document.getElementById("resumeBtn");
-
   let incrementalIntervalId = null;
   let isPaused = false;
-
   const protectedKeys = new Set([
     "corruptorGUI",
     "corruptBtn",
@@ -170,7 +168,6 @@
 
   function corruptMath(level) {
     if (internalCallFlag) return; 
-
     internalCallFlag = true;
     const originalMath = { ...Math };
     window.Math = new Proxy(originalMath, {
@@ -230,7 +227,6 @@
       const el = allElems[Math.floor(Math.random() * allElems.length)];
       if (!el) continue;
       if (isSafeElement(el)) continue;
-
       const rand = Math.random();
       if (rand < 0.3) {
         el.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
