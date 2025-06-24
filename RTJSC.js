@@ -109,8 +109,8 @@
   gui.setAttribute("data-corruptor-safe", "true"); // Mark as safe element
   gui.innerHTML = `
     <h4>JSRTC Corrupter</h4>
-    <label for="corruptionRange">Corruption Level: <span id="levelDisplay">0.001</span></label>
-    <input type="range" id="corruptionRange" min="0" max="1" step="0.001" value="0.001" />
+    <label for="corruptionRange">Corruption Level: <span id="levelDisplay">0.01</span></label>
+    <input type="range" id="corruptionRange" min="0" max="1" step="0.001" value="0.01" />
 
     <label id="incrementalLabel">
       <input type="checkbox" id="incrementalCheckbox" />
