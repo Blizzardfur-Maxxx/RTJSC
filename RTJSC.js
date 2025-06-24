@@ -95,7 +95,6 @@
       opacity: 0.4;
       cursor: not-allowed;
     }
-    /* Clear floats */
     #buttonContainer::after {
       content: "";
       display: block;
@@ -106,11 +105,15 @@
 
   const gui = document.createElement("div");
   gui.id = "corruptorGUI";
-  gui.setAttribute("data-corruptor-safe", "true"); // Mark as safe element
+  gui.setAttribute("data-corruptor-safe", "true");
   gui.innerHTML = `
     <h4>JSRTC Corrupter</h4>
+
     <label for="corruptionRange">Corruption Level: <span id="levelDisplay">0.01</span></label>
     <input type="range" id="corruptionRange" min="0" max="1" step="0.001" value="0.01" />
+
+    <label for="impactRange">Impact Spread (%): <span id="impactDisplay">50</span></label>
+    <input type="range" id="impactRange" min="0" max="100" step="1" value="50" />
 
     <label id="incrementalLabel">
       <input type="checkbox" id="incrementalCheckbox" />
@@ -134,7 +137,6 @@
 
     <button id="corruptBtn">Corrupt Now</button>
   `;
-  
   document.body.appendChild(gui);
 
   const corruptionRange = document.getElementById("corruptionRange");
@@ -146,29 +148,24 @@
   const corruptModeSelect = document.getElementById("corruptModeSelect");
   const pauseBtn = document.getElementById("pauseBtn");
   const resumeBtn = document.getElementById("resumeBtn");
+  const impactRange = document.getElementById("impactRange");
+  const impactDisplay = document.getElementById("impactDisplay");
+
   let incrementalIntervalId = null;
   let isPaused = false;
-  const protectedKeys = new Set([
-    "corruptorGUI",
-    "corruptBtn",
-    "corruptionRange",
-    "incrementalCheckbox",
-    "intervalRange",
-    "corruptModeSelect",
-    "pauseBtn",
-    "resumeBtn",
-    "levelDisplay",
-    "intervalValue",
-    "buttonContainer",
-  ]);
   let internalCallFlag = false;
+
+  const protectedKeys = new Set([
+    "corruptorGUI", "corruptBtn", "corruptionRange", "incrementalCheckbox", "intervalRange",
+    "corruptModeSelect", "pauseBtn", "resumeBtn", "levelDisplay", "intervalValue", "buttonContainer", "impactRange", "impactDisplay"
+  ]);
 
   function isSafeElement(el) {
     return el && el.closest && el.closest('[data-corruptor-safe="true"]');
   }
 
   function corruptMath(level) {
-    if (internalCallFlag) return; 
+    if (internalCallFlag) return;
     internalCallFlag = true;
     const originalMath = { ...Math };
     window.Math = new Proxy(originalMath, {
@@ -176,9 +173,7 @@
         const orig = target[prop];
         if (typeof orig === "function") {
           return function (...args) {
-            if (internalCallFlag) {
-              return orig.apply(target, args);
-            }
+            if (internalCallFlag) return orig.apply(target, args);
             internalCallFlag = true;
             const result = orig.apply(target, args);
             internalCallFlag = false;
@@ -205,9 +200,9 @@
     internalCallFlag = false;
   }
 
-  function corruptDOM(level) {
+  function corruptDOM(level, spread) {
     const keys = Object.keys(window);
-    const targetKeys = keys.filter((k) => Math.random() < level && !protectedKeys.has(k));
+    const targetKeys = keys.filter((k) => Math.random() < (level * (spread / 100)) && !protectedKeys.has(k));
     targetKeys.forEach((key) => {
       try {
         const rand = Math.random();
@@ -224,10 +219,9 @@
     });
 
     const allElems = document.querySelectorAll("*");
-    for (let i = 0; i < allElems.length * level; i++) {
+    for (let i = 0; i < allElems.length * (level * (spread / 100)); i++) {
       const el = allElems[Math.floor(Math.random() * allElems.length)];
-      if (!el) continue;
-      if (isSafeElement(el)) continue;
+      if (!el || isSafeElement(el)) continue;
       const rand = Math.random();
       if (rand < 0.3) {
         el.style.transform = `rotate(${Math.floor(Math.random() * 360)}deg)`;
@@ -235,11 +229,10 @@
         const text = el.textContent;
         const corruptionAmount = Math.floor(text.length * level);
         const chars = text.split("");
-        const garbageChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+        const garbage = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
         for (let i = 0; i < corruptionAmount; i++) {
           const idx = Math.floor(Math.random() * chars.length);
-          const randChar = garbageChars.charAt(Math.floor(Math.random() * garbageChars.length));
-          chars[idx] = randChar;
+          chars[idx] = garbage[Math.floor(Math.random() * garbage.length)];
         }
         el.textContent = chars.join("");
       } else {
@@ -249,15 +242,16 @@
   }
 
   function corruptNow(level) {
+    const spread = parseFloat(impactRange.value);
     const mode = corruptModeSelect.value;
     if (mode === "math") {
       corruptMath(level);
       console.log("Math corruption executed.");
     } else if (mode === "dom") {
-      corruptDOM(level);
+      corruptDOM(level, spread);
       console.log("DOM corruption executed.");
     } else {
-      corruptDOM(level);
+      corruptDOM(level, spread);
       corruptMath(level);
       console.log("Both Math + DOM corruption executed.");
     }
@@ -284,6 +278,10 @@
 
   corruptionRange.addEventListener("input", (e) => {
     levelDisplay.textContent = e.target.value;
+  });
+
+  impactRange.addEventListener("input", (e) => {
+    impactDisplay.textContent = e.target.value;
   });
 
   intervalRange.addEventListener("input", (e) => {
