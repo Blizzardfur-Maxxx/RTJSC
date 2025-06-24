@@ -156,8 +156,19 @@
   let internalCallFlag = false;
 
   const protectedKeys = new Set([
-    "corruptorGUI", "corruptBtn", "corruptionRange", "incrementalCheckbox", "intervalRange",
-    "corruptModeSelect", "pauseBtn", "resumeBtn", "levelDisplay", "intervalValue", "buttonContainer", "impactRange", "impactDisplay"
+    "corruptorGUI",
+    "corruptBtn",
+    "corruptionRange",
+    "incrementalCheckbox",
+    "intervalRange",
+    "corruptModeSelect",
+    "pauseBtn",
+    "resumeBtn",
+    "levelDisplay",
+    "intervalValue",
+    "buttonContainer",
+    "impactRange",
+    "impactDisplay"
   ]);
 
   function isSafeElement(el) {
