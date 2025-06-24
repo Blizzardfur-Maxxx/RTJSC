@@ -134,6 +134,7 @@
 
     <button id="corruptBtn">Corrupt Now</button>
   `;
+  
   document.body.appendChild(gui);
 
   const corruptionRange = document.getElementById("corruptionRange");
